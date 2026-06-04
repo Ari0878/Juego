@@ -1,0 +1,23 @@
+# Dependencias
+backend/node_modules/
+mobile/node_modules/
+
+# Variables de entorno
+backend/.env
+mobile/.env
+
+# Expo
+mobile/.expo/
+mobile/.expo-shared/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Sistema
+.DS_Store
+Thumbs.db
+
+# Archivos temporales
+*.tmp
+*.temp
