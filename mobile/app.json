@@ -1,0 +1,22 @@
+{
+  "expo": {
+    "name": "Hangman Duel",
+    "slug": "hangman-duel",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "backgroundColor": "#0D0D1A"
+    },
+    "ios": {
+      "supportsTablet": false
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#0D0D1A"
+      }
+    },
+    "plugins": []
+  }
+}
