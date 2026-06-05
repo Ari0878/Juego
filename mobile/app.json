@@ -4,7 +4,6 @@
     "slug": "hangman-duel",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
     "splash": {
       "backgroundColor": "#0D0D1A"
@@ -15,8 +14,14 @@
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#0D0D1A"
-      }
+      },
+      "package": "com.brissetcadena.hangmanduel"
     },
-    "plugins": []
+    "plugins": [],
+    "extra": {
+      "eas": {
+        "projectId": "307919fd-44c7-4cfd-a68a-1d02622bd31c"
+      }
+    }
   }
 }

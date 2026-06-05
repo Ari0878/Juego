@@ -21,3 +21,9 @@ Thumbs.db
 # Archivos temporales
 *.tmp
 *.temp
+mobile.zip
+.expo/
+mobile/.expo/
+node_modules/
+.env
+.env.*
