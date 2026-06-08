@@ -113,6 +113,7 @@ export default function GameScreen({ route, navigation }) {
   // ── ⏱ Temporizador ────────────────────────────────────────────────────────
   const [timeLeft, setTimeLeft] = useState(TURN_SECONDS);
   const timeLeftRef = useRef(TURN_SECONDS);
+  const currentPlayerRef = useRef(null);
 
   // ── 📊 Estadísticas ────────────────────────────────────────────────────────
   const [stats, setStats] = useState({
@@ -158,8 +159,29 @@ export default function GameScreen({ route, navigation }) {
     const socket = io(SERVER_URL, { transports: ["websocket"] });
     socketRef.current = socket;
     socket.on("connect",    () => socket.emit("join_room", { code, playerName }));
-    socket.on("room_state", (state) => setGameState(state));
-    socket.on("new_round",  (state) => { setRoundModal(null); setGameState(state); resetTimer(); });
+    socket.on("room_state", (state) => {
+      console.log("room_state recibido:", state.currentPlayer, state.status);
+      const prevPlayer = currentPlayerRef.current;
+      currentPlayerRef.current = state.currentPlayer;
+      setGameState(state);
+      // Reiniciar timer cuando cambia el turno o es la primera vez
+      if (state.status === "playing") {
+        if (prevPlayer === null || prevPlayer !== state.currentPlayer) {
+          console.log("Iniciando/reiniciando timer:", prevPlayer, "->", state.currentPlayer);
+          resetTimer();
+          startTimer();
+        }
+      } else {
+        clearTimerInterval();
+      }
+    });
+    socket.on("new_round",  (state) => {
+      currentPlayerRef.current = state.currentPlayer;
+      setRoundModal(null);
+      setGameState(state);
+      resetTimer();
+      startTimer();
+    });
     socket.on("round_end",  (state) => {
       clearTimerInterval();
       setGameState(state);
@@ -176,14 +198,6 @@ export default function GameScreen({ route, navigation }) {
     socket.on("error", () => { shakeScreen(); play("wrong"); });
     return () => { socket.disconnect(); clearTimerInterval(); };
   }, []);
-
-  // ─── Temporizador (solo multijugador) ─────────────────────────────────────
-  useEffect(() => {
-    if (singlePlayer || !gameState || gameState.status !== "playing") return;
-    resetTimer();
-    startTimer();
-    return () => clearTimerInterval();
-  }, [gameState?.currentPlayer, gameState?.status]);
 
   function clearTimerInterval() {
     if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; }
@@ -215,7 +229,8 @@ export default function GameScreen({ route, navigation }) {
         shakeScreen();
         play("wrong");
         // Emitir evento al servidor para cambiar de turno
-        if (socketRef.current && !singlePlayer) {
+        if (socketRef.current && !singlePlayer && gameState?.status === "playing") {
+          console.log("Emitiendo skip_turn:", { code, playerNumber });
           socketRef.current.emit("skip_turn", { code, playerNumber });
         }
       }

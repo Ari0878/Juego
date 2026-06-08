@@ -282,20 +282,24 @@ io.on("connection", (socket) => {
 
   // Saltar turno (cuando se acaba el tiempo)
   socket.on("skip_turn", async ({ code, playerNumber }) => {
+    console.log("skip_turn recibido:", { code, playerNumber });
     const roomCode = code.toUpperCase();
     const room = await getRoomByCode(roomCode);
 
     if (!room || room.status !== "playing") {
+      console.log("Error: Juego no activo");
       socket.emit("error", { message: "Juego no activo" });
       return;
     }
     if (room.current_player !== playerNumber) {
+      console.log("Error: No es tu turno", room.current_player, playerNumber);
       socket.emit("error", { message: "No es tu turno" });
       return;
     }
 
     // Cambiar al otro jugador
     const nextPlayer = playerNumber === 1 ? 2 : 1;
+    console.log("Cambiando turno de", playerNumber, "a", nextPlayer);
 
     await pool.query(
       `UPDATE rooms SET current_player = $1 WHERE code = $2`,
@@ -303,10 +307,12 @@ io.on("connection", (socket) => {
     );
 
     const updatedRoom = await getRoomByCode(roomCode);
+    console.log("Room actualizada:", updatedRoom.current_player);
     io.to(roomCode).emit("room_state", {
       ...serializeRoom(updatedRoom),
       skipped: true,
     });
+    console.log("room_state emitido con skipped=true");
   });
 
   socket.on("disconnect", () => {
